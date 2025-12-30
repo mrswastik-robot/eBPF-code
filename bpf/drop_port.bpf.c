@@ -25,10 +25,11 @@ struct {
 SEC("tc")
 int drop_tcp_port(struct __sk_buff *skb)
 {
+    // getting raw pointers first
     void *data = (void *)(long)skb->data;
     void *data_end = (void *)(long)skb->data_end;
 
-    // Parse Ethernet header (bounds check required by eBPF verifier)
+    // Parse Ethernet header
     struct ethhdr *eth = data;
     if ((void *)(eth + 1) > data_end)
         return TC_ACT_OK;
@@ -46,7 +47,7 @@ int drop_tcp_port(struct __sk_buff *skb)
     if (ip->protocol != IPPROTO_TCP)
         return TC_ACT_OK;
 
-    // Parse TCP header (ip->ihl * 4 gives IP header length in bytes)
+    // ip->ihl*4 gives IP header length in bytes
     struct tcphdr *tcp = (void *)ip + ip->ihl * 4;
     if ((void *)(tcp + 1) > data_end)
         return TC_ACT_OK;
@@ -57,17 +58,17 @@ int drop_tcp_port(struct __sk_buff *skb)
     if (!port)
         return TC_ACT_OK;
 
-    // Check if destination port matches the blocked port
+    // if dest port matches the blocked port
     if (tcp->dest == __constant_htons(*port)) {
-        // Increment drop counter
+        // inc drop counter
         __u64 *count = bpf_map_lookup_elem(&drop_count, &key);
         if (count)
             __sync_fetch_and_add(count, 1);
         
-        return TC_ACT_SHOT;  // Drop the packet
+        return TC_ACT_SHOT;  // dropping the packet
     }
 
-    return TC_ACT_OK;  // Allow the packet
+    return TC_ACT_OK;  //else allow it
 }
 
 char _license[] SEC("license") = "GPL";
