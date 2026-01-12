@@ -22,5 +22,5 @@ jobs:
         with:
           accuknox_token: ${{ secrets.ACCUKNOX_TOKEN }}
           accuknox_endpoint: "cspm.demo.accuknox.com"
-          accuknox_label: "ebpf-container-scan"
+          accuknox_label: "ebpfContainerScan"
           image_name: test-image:latest
