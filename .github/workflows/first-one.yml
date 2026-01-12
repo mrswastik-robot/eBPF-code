@@ -1,4 +1,4 @@
-name: Accuknox Container Scan
+name: AccuKnox Container Scan
 
 on:
   push:
@@ -17,8 +17,7 @@ jobs:
         run: |
           docker buildx build -t test-image:latest .
 
-      - name: Accuknox Container Scan
-        uses: accuknox/container-scan-action@v0.0.1
+      - name: Run AccuKnox Container Scan
+        uses: accuknox/container-scan-action@v1.0.1
         with:
           token: ${{ secrets.ACCUKNOX_TOKEN }}
-          image_name: test-image:latest
