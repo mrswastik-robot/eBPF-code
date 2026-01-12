@@ -1,15 +1,24 @@
+name: Accuknox Container Scan
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
 jobs:
   accuknox-cicd:
-  runs-on: ubuntu-latest
-  steps:
-    - name: Checkout code
-      uses: actions/checkout@main
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Build docker image
-      run: |
-        docker buildx build .
+      - name: Build docker image
+        run: |
+          docker buildx build -t test-image:latest .
 
-    - name: Accuknox Container Scan
-      uses: accuknox/container-scan-action@v0.0.1
-      with:
-        token: eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzcwODAwNTkwLCJqdGkiOiJiMTAwOWFmZTI4MDU0M2QwODdlODUyYzYxNTBhNzM4MyIsInRlbmFudC1pZCI6Nzc1NiwiaXNzIjoiY3NwbS5kZW1vLmFjY3Vrbm94LmNvbSJ9.Bt4v08L5LN4-uXZO1PjKo4YuMT_iIWB0DUSQq91Qj7j9uHd8l_GX7BXwN-YrLBRfGjv-paeiitslGf4qCCsYmH87sHFkJPWdrucfZrbkdb-Mbuw2nIdCTwylJ0CwpJnBL_Pb9rG9cqzXOmLMzSC53tedd0BjOZ_SPbhlePyQudSQpyOaI7RlpNwCcfYQ7qR81rVE3WBmGrhEFSDD6y4yBsmwIXDYrWfSDE5nxsj8VrzRmps-7dQ_v8Rh21ZL8qDw8HbOSGm_gqbGImmbnJWholF8y-hoiFOzcODER_57nA2ShoCgoRR0hsqWzqps38_gJTbORpWuYbCzBrPawW4o7Q
+      - name: Accuknox Container Scan
+        uses: accuknox/container-scan-action@v0.0.1
+        with:
+          token: ${{ secrets.ACCUKNOX_TOKEN }}
+          image_name: test-image:latest
