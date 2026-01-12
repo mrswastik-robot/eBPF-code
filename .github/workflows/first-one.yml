@@ -20,4 +20,7 @@ jobs:
       - name: Run AccuKnox Container Scan
         uses: accuknox/container-scan-action@v1.0.1
         with:
-          token: ${{ secrets.ACCUKNOX_TOKEN }}
+          accuknox_token: ${{ secrets.ACCUKNOX_TOKEN }}
+          accuknox_endpoint: "cspm.demo.accuknox.com"
+          accuknox_label: "ebpf-container-scan"
+          image_name: test-image:latest
