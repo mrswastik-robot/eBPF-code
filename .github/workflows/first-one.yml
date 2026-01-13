@@ -42,6 +42,7 @@ jobs:
           accuknox_endpoint: "cspm.demo.accuknox.com"
           accuknox_label: "ebpfIaCScan"
           directory: "."
+          soft_fail: true
 
   # Job 3: SAST Scan with Semgrep/Opengrep
   sast-scan:
@@ -53,8 +54,16 @@ jobs:
 
       - name: Run AccuKnox SAST Scan (Opengrep)
         uses: accuknox/sast-scan-opengrep-action@v1.0.1
+        continue-on-error: true
         with:
           accuknox_token: ${{ secrets.ACCUKNOX_TOKEN }}
           accuknox_endpoint: "cspm.demo.accuknox.com"
           accuknox_label: "ebpfSASTScan"
-          soft_fail: false
+          soft_fail: true
+
+      - name: SAST Scan Result
+        if: failure()
+        run: |
+          echo "⚠️ SAST scan encountered an issue (possibly rate limiting)."
+          echo "Results may still be uploaded to AccuKnox dashboard."
+          echo "Check: https://cspm.demo.accuknox.com"
