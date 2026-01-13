@@ -1,4 +1,4 @@
-name: AccuKnox Container Scan
+name: AccuKnox ASPM Security Scans
 
 on:
   push:
@@ -7,7 +7,9 @@ on:
     branches: [main]
 
 jobs:
-  accuknox-cicd:
+  # Job 1: Container Image Scan (SCA)
+  container-scan:
+    name: Container Image Scan
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -24,3 +26,35 @@ jobs:
           accuknox_endpoint: "cspm.demo.accuknox.com"
           accuknox_label: "ebpfContainerScan"
           image_name: test-image:latest
+
+  # Job 2: Infrastructure as Code (IaC) Scan
+  iac-scan:
+    name: IaC Security Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run AccuKnox IaC Scan
+        uses: accuknox/iac-scan-action@v1.0.1
+        with:
+          accuknox_token: ${{ secrets.ACCUKNOX_TOKEN }}
+          accuknox_endpoint: "cspm.demo.accuknox.com"
+          accuknox_label: "ebpfIaCScan"
+          directory: "."
+
+  # Job 3: SAST Scan with Semgrep/Opengrep
+  sast-scan:
+    name: SAST Security Scan (Semgrep)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run AccuKnox SAST Scan (Opengrep)
+        uses: accuknox/sast-scan-opengrep-action@v1.0.1
+        with:
+          accuknox_token: ${{ secrets.ACCUKNOX_TOKEN }}
+          accuknox_endpoint: "cspm.demo.accuknox.com"
+          accuknox_label: "ebpfSASTScan"
+          soft_fail: false
