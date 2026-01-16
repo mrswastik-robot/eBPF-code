@@ -52,6 +52,28 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Run Semgrep and Save Results
+        run: |
+          # Install Semgrep
+          pip3 install semgrep
+          
+          # Run Semgrep and save results to JSON
+          semgrep --config=auto --json --output=sast-results.json . || true
+          
+          # Also create a readable text version
+          semgrep --config=auto --output=sast-results.txt . || true
+          
+          echo "✅ SAST results saved to sast-results.json and sast-results.txt"
+
+      - name: Upload SAST Results as Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: sast-scan-results
+          path: |
+            sast-results.json
+            sast-results.txt
+          retention-days: 30
+
       - name: Run AccuKnox SAST Scan (Opengrep)
         uses: accuknox/sast-scan-opengrep-action@v1.0.1
         continue-on-error: true
@@ -61,9 +83,27 @@ jobs:
           accuknox_label: "ebpfSASTScan"
           soft_fail: true
 
-      - name: SAST Scan Result
-        if: failure()
+      - name: SAST Scan Summary
         run: |
-          echo "⚠️ SAST scan encountered an issue (possibly rate limiting)."
-          echo "Results may still be uploaded to AccuKnox dashboard."
-          echo "Check: https://cspm.demo.accuknox.com"
+          echo "📊 SAST Scan Complete!"
+          echo "- JSON results: Download from Actions artifacts"
+          echo "- Dashboard: https://cspm.demo.accuknox.com"
+
+  # Job 4: DAST Scan (Dynamic Application Security Testing)
+  dast-scan:
+    name: DAST Security Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run AccuKnox DAST Scan
+        uses: accuknox/dast-scan-action@v1.0.1
+        with:
+          target_url: "http://testphp.vulnweb.com"
+          accuknox_token: ${{ secrets.ACCUKNOX_TOKEN }}
+          accuknox_endpoint: "cspm.demo.accuknox.com"
+          accuknox_label: "ebpfDASTScan"
+          severity_threshold: "High"
+          #scan_type: "baseline"
+          soft_fail: true
